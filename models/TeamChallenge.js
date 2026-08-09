@@ -1,17 +1,55 @@
 const mongoose = require('mongoose')
+const { data } = require('react-router')
 
 const teamChallengeSchema = new mongoose.Schema({
     
-    challenger:{
+    venueId:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "Venue",
         required: true
-
     },
-    opponent:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+    sportType:{
+        type: String,
         required: true
+    },
+    date: {
+        type: Date,
+        required: true
+    },
+    timeSlot: {
+        type: String,
+        required: true
+    },
+    challengerTeam:{
+        leaderId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        teamName:{
+            type: String,
+            required: true
+        },
+        players:{
+            tupe: [String],
+            default: []
+        } 
+    },
+    opponentTeam:{
+        leaderId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        teamName: {
+            type: String,
+            required: true
+        },
+        players: {
+            type: [String],
+            default: []
+        }
+        
     },
     booking:{
         type: mongoose.Schema.Types.ObjectId,
@@ -21,8 +59,8 @@ const teamChallengeSchema = new mongoose.Schema({
     },
     status:{
         type: String,
-        enum: ['pending', 'accepted', 'declined', 'completed'],
-        default: 'pending'
+        enum: ['Looking for Opponent', 'Matched & Booked', 'completed'],
+        default: 'Looking for Opponent'
     }
 },{timestamps:true})
 
@@ -30,3 +68,4 @@ const teamChallengeSchema = new mongoose.Schema({
 const TeamChalleng = mongoose.model("TeamChalleng", teamChallengeSchema)
 
 module.exports = TeamChalleng
+
