@@ -6,15 +6,7 @@ import Venue from '../models/Venue.js'
 async function createBooking(req, res) {
     try {
         const { date, timeSlots, status, invitedPlayers, teams } = req.body
-        const booking = await Booking.find()
 
-        booking.forEach((book) => {
-            if (book.date === date && book.timeSlots.some(slot => timeSlots.includes(slot))) {
-                return res.status(400).json({
-                    error: 'Time slot already booked'
-                })
-            }
-        })
         const venue = await Venue.findById(req.params.id)
         if (!venue) {
             return res.status(404).json({
@@ -22,18 +14,31 @@ async function createBooking(req, res) {
             })
         }
 
+        console.log("1. Venue sportType from DB:", venue.sportType)
+
+        let isFootball = false;
+        if (Array.isArray(venue.sportType)) {
+            isFootball = venue.sportType.some(s => typeof s === 'string' && s.toLowerCase() === 'football');
+        } else if (typeof venue.sportType === 'string') {
+            isFootball = venue.sportType.toLowerCase() === 'football';
+        }
+
+        console.log("2. Is Football?:", isFootball)
+
         let createdBook
-        if (venue.sportType === "football") {
+        if (isFootball) {
+            console.log("3. SUCCESS: Hit the football block!")
             createdBook = await Booking.create({
-                venue: venue._id,
+                venue: req.params.id,
                 owner: req.user._id,
                 date,
                 timeSlots,
                 status,
-                invitedPlayers,
-                teams
+                invitedPlayers: invitedPlayers || [],
+                teams: teams || { teamA: [], teamB: [] }
             })
         } else {
+            console.log("3. WARNING: Hit the ELSE block (sportType didn't match 'football')")
             createdBook = await Booking.create({
                 venue: venue._id,
                 owner: req.user._id,
@@ -44,8 +49,9 @@ async function createBooking(req, res) {
         }
         res.status(201).json(createdBook);
     } catch (error) {
+        console.log(error)
         res.status(500).json({
-            error: error.message,
+            error: error.message
         });
     }
 }
