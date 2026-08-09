@@ -5,7 +5,7 @@ const {
   createVenue,
 } = require("../controllers/venues.controller");
 
-router.get("/", getVenues);
+router.get("/venues", getVenues);
 router.get("/:id", getVenuesById);
 router.post("/", createVenue);
 
