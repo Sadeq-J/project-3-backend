@@ -19,19 +19,19 @@ async function createBooking(req, res) {
             createdBook = await Booking.create({
                 venue: venue._id,
                 owner: req.user._id,
-                date: date,
-                timeSlots: timeSlots,
-                status: status,
-                invitedPlayers: invitedPlayers,
-                teams: teams
+                date,
+                timeSlots,
+                status,
+                invitedPlayers,
+                teams
             })
         } else {
             createdBook = await Booking.create({
                 venue: venue._id,
                 owner: req.user._id,
-                date: date,
-                timeSlots: timeSlots,
-                status: status,
+                date,
+                timeSlots,
+                status,
             })
         }
         res.status(201).json(createdBook);
