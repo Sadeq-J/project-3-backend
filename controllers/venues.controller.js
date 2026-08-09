@@ -1,4 +1,4 @@
-const venue = require("../models/venue");
+const Venue = require("../models/Venue");
 
 const getVenues = async (req, res) => {
   try {
