@@ -4,7 +4,7 @@ const {createBooking, getBooking, updateBooking} = require('../controllers/booki
 
 
 
-router.post('/', createBooking)
+router.post('/:id', createBooking)
 router.get('/my-booking', getBooking)
 router.put('/:id/edit', updateBooking)
 

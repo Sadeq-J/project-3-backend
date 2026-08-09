@@ -6,14 +6,22 @@ import Venue from '../models/Venue.js'
 async function createBooking(req, res) {
     try {
         const { date, timeSlots, status, invitedPlayers, teams } = req.body
+        const booking = await Booking.find()
 
+        booking.forEach((book) => {
+            if (book.date === date && book.timeSlots.some(slot => timeSlots.includes(slot))) {
+                return res.status(400).json({
+                    error: 'Time slot already booked'
+                })
+            }
+        })
         const venue = await Venue.findById(req.params.id)
         if (!venue) {
             return res.status(404).json({
                 error: 'Venue not found'
             })
         }
-        
+
         let createdBook
         if (venue.sportType === "football") {
             createdBook = await Booking.create({
