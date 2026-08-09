@@ -7,7 +7,7 @@ const {
   deleteVenue,
 } = require("../controllers/venues.controller");
 
-router.get("/venues", getVenues);
+router.get("/", getVenues);
 router.get("/:id", getVenuesById);
 router.post("/", createVenue);
 router.put("/:id", updateVenue);

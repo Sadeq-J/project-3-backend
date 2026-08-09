@@ -31,7 +31,7 @@ const teamChallengeSchema = new mongoose.Schema({
             required: true
         },
         players:{
-            tupe: [String],
+            type: [String],
             default: []
         } 
     },
@@ -39,11 +39,11 @@ const teamChallengeSchema = new mongoose.Schema({
         leaderId:{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            required: true
+            
         },
         teamName: {
             type: String,
-            required: true
+            
         },
         players: {
             type: [String],
@@ -54,7 +54,7 @@ const teamChallengeSchema = new mongoose.Schema({
     booking:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Booking',
-        required: true
+        
 
     },
     status:{

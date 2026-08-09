@@ -62,7 +62,7 @@ async function createVenue(req, res) {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      error: error.message,
+      error: error.message
     });
   }
 }
