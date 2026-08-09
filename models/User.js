@@ -16,6 +16,18 @@ const userSchema = new mongoose.Schema(
     isAdmin:{
       type: Boolean,
       default: false
+    },
+    followers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }],
+    following: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }],
+    profilePicture: {
+      type: String,
+      default: "https://res.cloudinary.com/dxjv7gq3f/image/upload/v1697040910/default-profile-picture-1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_q6kz8b.png"
     }
   },
   { timestamps: true },
