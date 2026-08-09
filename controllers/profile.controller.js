@@ -118,8 +118,7 @@ updateProfile = async (req, res) => {
 }
 
 
-
-exports = {
+module.exports = {
     getProfile,
     getUserProfile,
     followUser,
