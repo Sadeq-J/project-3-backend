@@ -1,7 +1,6 @@
 const User = require("../models/User")
 
-
-getProfile = async (req, res) => {
+const getProfile = async (req, res) => {
   try {
     const userId = req.user._id
     const user = await User.findById(userId).populate("followers following", "username")
@@ -15,10 +14,10 @@ getProfile = async (req, res) => {
   }
 }
 
-getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res) => {
   try {
-    const { userId } = req.params
-    const user = await User.findById(userId).populate("followers following", "username")
+    const { id } = req.params // Matches route parameter
+    const user = await User.findById(id).populate("followers following", "username profilePicture")
     if (!user) {
       return res.status(404).json({ error: "User not found" })
     }
@@ -29,7 +28,7 @@ getUserProfile = async (req, res) => {
   }
 }
 
-followUser = async (req, res) => {
+const followUser = async (req, res) => {
   try {
     const userId = req.user._id
     const { targetUserId } = req.body
@@ -62,7 +61,7 @@ followUser = async (req, res) => {
   }
 }
 
-unfollowUser = async (req, res) => {
+const unfollowUser = async (req, res) => {
   try {
     const userId = req.user._id
     const { targetUserId } = req.body
@@ -95,19 +94,25 @@ unfollowUser = async (req, res) => {
   }
 }
 
-updateProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id
-    const { username, profilePicture } = req.body
+    const { username, bio } = req.body
 
     const user = await User.findById(userId)
     if (!user) {
       return res.status(404).json({ error: "User not found" })
     }
 
-    // Update user fields if provided
     if (username) user.username = username
-    if (profilePicture) user.profilePicture = profilePicture
+    if (bio) user.bio = bio
+
+    // If an image file was uploaded via Multer/Cloudinary, save its secure URL
+    if (req.file) {
+      user.profilePicture = req.file.path
+    } else if (req.body.profilePicture) {
+      user.profilePicture = req.body.profilePicture
+    }
 
     await user.save()
     res.json({ message: "Profile updated successfully", user })
@@ -116,7 +121,6 @@ updateProfile = async (req, res) => {
     res.status(500).json({ error: "Internal server error" })
   }
 }
-
 
 module.exports = {
     getProfile,
