@@ -10,6 +10,7 @@ const authRoutes = require("./routes/auth.routes");
 const venueRoutes = require("./routes/venues.routes");
 const bookRoutes = require('./routes/book.routes')
 const challengeRoutes = require("./routes/challengeRoutes")
+const profileRoutes = require("./routes/profile.routes")
 
 // Middleware
 app.use(
@@ -25,5 +26,5 @@ app.use("/auth", authRoutes);
 app.use("/venues", venueRoutes);
 app.use('/booking', bookRoutes)
 app.use("/challenges", challengeRoutes)
-
+app.use("/profile", profileRoutes)
 module.exports = app;
