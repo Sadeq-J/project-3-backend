@@ -68,3 +68,4 @@ const teamChallengeSchema = new mongoose.Schema({
 const TeamChalleng = mongoose.model("TeamChalleng", teamChallengeSchema)
 
 module.exports = TeamChalleng
+
