@@ -1,23 +1,41 @@
 const Venue = require("../models/Venue");
 
-async function getVenues(req, res) {
+const getVenues = async (req, res) => {
   try {
-    const { sportType, location } = req.query;
+    const { sportType, location, minPrice, maxPrice } = req.query;
+
     const filter = {};
+
     if (sportType) {
       filter.sportType = sportType;
     }
+
     if (location) {
       filter.location = location;
     }
+
+    if (minPrice || maxPrice) {
+      filter.pricePerHour = {};
+
+      if (minPrice) {
+        filter.pricePerHour.$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        filter.pricePerHour.$lte = Number(maxPrice);
+      }
+    }
+
     const venues = await Venue.find(filter);
+
     res.status(200).json(venues);
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Failed to get venues",
+      error: error.message,
     });
   }
-}
+};
 
 async function getVenuesById(req, res) {
   try {
@@ -48,9 +66,52 @@ async function createVenue(req, res) {
     });
   }
 }
+const updateVenue = async (req, res) => {
+  try {
+    const venue = await Venue.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!venue) {
+      return res.status(404).json({
+        message: "Venue not found",
+      });
+    }
+
+    res.status(200).json(venue);
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to update venue",
+      error: error.message,
+    });
+  }
+};
+const deleteVenue = async (req, res) => {
+  try {
+    const venue = await Venue.findByIdAndDelete(req.params.id);
+
+    if (!venue) {
+      return res.status(404).json({
+        message: "Venue not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Venue deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete venue",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
   getVenues,
   getVenuesById,
   createVenue,
+  updateVenue,
+  deleteVenue,
 };
