@@ -13,7 +13,7 @@ async function createBooking(req, res) {
                 error: 'Venue not found'
             })
         }
-        
+
         console.log("1. Venue sportType from DB:", venue.sportType)
 
         let isFootball = false;
@@ -23,9 +23,8 @@ async function createBooking(req, res) {
             isFootball = venue.sportType.toLowerCase() === 'football';
         }
 
-
         console.log("2. Is Football?:", isFootball)
-        
+
         let createdBook
         if (isFootball) {
             console.log("3. SUCCESS: Hit the football block!")
@@ -36,7 +35,7 @@ async function createBooking(req, res) {
                 timeSlots,
                 status,
                 invitedPlayers: invitedPlayers || [],
-                teams: teams || {teamA: [], teamB: []}
+                teams: teams || { teamA: [], teamB: [] }
             })
         } else {
             console.log("3. WARNING: Hit the ELSE block (sportType didn't match 'football')")
