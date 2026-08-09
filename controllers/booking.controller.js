@@ -14,18 +14,32 @@ async function createBooking(req, res) {
             })
         }
         
+        console.log("1. Venue sportType from DB:", venue.sportType)
+
+        let isFootball = false;
+        if (Array.isArray(venue.sportType)) {
+            isFootball = venue.sportType.some(s => typeof s === 'string' && s.toLowerCase() === 'football');
+        } else if (typeof venue.sportType === 'string') {
+            isFootball = venue.sportType.toLowerCase() === 'football';
+        }
+
+
+        console.log("2. Is Football?:", isFootball)
+        
         let createdBook
-        if (venue.sportType === "football") {
+        if (isFootball) {
+            console.log("3. SUCCESS: Hit the football block!")
             createdBook = await Booking.create({
-                venue: venue._id,
+                venue: req.params.id,
                 owner: req.user._id,
                 date,
                 timeSlots,
                 status,
-                invitedPlayers,
-                teams
+                invitedPlayers: invitedPlayers || [],
+                teams: teams || {teamA: [], teamB: []}
             })
         } else {
+            console.log("3. WARNING: Hit the ELSE block (sportType didn't match 'football')")
             createdBook = await Booking.create({
                 venue: venue._id,
                 owner: req.user._id,
@@ -36,8 +50,9 @@ async function createBooking(req, res) {
         }
         res.status(201).json(createdBook);
     } catch (error) {
+        console.log(error)
         res.status(500).json({
-            error: error.message,
+            error: error.message
         });
     }
 }

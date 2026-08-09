@@ -20,7 +20,7 @@ const venueSchema = new mongoose.Schema(
     sportType: {
       type: [String],
       required: true,
-      enum: ["football", "padel", "basketball", "tennis", "swimming"],
+      enum: ["Football", "Padel", "Basketball", "Tennis", "Swimming"],
     },
 
     pricePerHour: {
