@@ -1,4 +1,5 @@
 const User = require("../models/User")
+const Notification = require("../models/Notifications")
 
 const getAllProfiles = async (req, res) => {
   try {
@@ -93,6 +94,12 @@ const followUser = async (req, res) => {
     await user.save()
     await targetUser.save()
 
+    await Notification.create({
+      recipient: targetUserId,
+      sender: userId,
+      type: 'follow'
+    })
+
     res.status(200).json({ message: "Successfully followed the user" })
   } catch (error) {
     console.error("Error following user:", error)
@@ -164,13 +171,13 @@ const updateProfile = async (req, res) => {
 async function getfriends(req, res) {
   try {
     const userId = req.user._id;
-    
+
     const user = await User.findById(userId).populate("following", "username profilePicture bio");
-    
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
+
     res.json(user.following);
   } catch (error) {
     console.error("Error fetching friends:", error);
@@ -194,7 +201,7 @@ const searchFriends = async (req, res) => {
 
     const matchingFriends = await User.find({
       _id: { $in: currentUser.following },
-      username: { $regex: query, $options: "i" } 
+      username: { $regex: query, $options: "i" }
     }).select("username profilePicture bio");
 
     res.json(matchingFriends);
@@ -205,13 +212,13 @@ const searchFriends = async (req, res) => {
 };
 
 module.exports = {
-    getProfile,
-    getUserProfile,
-    followUser,
-    unfollowUser,
-    updateProfile,
-    getfriends,
-    searchFriends,
-    getMyFollowers,
-    getMyFollowing
+  getProfile,
+  getUserProfile,
+  followUser,
+  unfollowUser,
+  updateProfile,
+  getfriends,
+  searchFriends,
+  getMyFollowers,
+  getMyFollowing
 }

@@ -11,6 +11,7 @@ const venueRoutes = require("./routes/venues.routes");
 const bookRoutes = require('./routes/book.routes')
 const challengeRoutes = require("./routes/challengeRoutes")
 const profileRoutes = require("./routes/profile.routes")
+const notificationRoutes = require("./routes/notification.routes")
 
 // Middleware
 app.use(
@@ -27,4 +28,5 @@ app.use("/venues", venueRoutes);
 app.use('/booking', bookRoutes)
 app.use("/challenges", challengeRoutes)
 app.use("/profile", profileRoutes)
+app.use("/notifications", notificationRoutes)
 module.exports = app;
