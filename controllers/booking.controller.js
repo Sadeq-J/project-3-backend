@@ -1,7 +1,7 @@
 
 import Booking from '../models/Booking.js'
 import Venue from '../models/Venue.js'
-const Notification = require("../models/Notifications.js")
+import Notification from "../models/Notifications.js"
 
 
 async function createBooking(req, res) {
