@@ -1,5 +1,15 @@
 const User = require("../models/User")
 
+const getAllProfiles = async (req, res) => {
+  try {
+    const users = await User.find().select("username profilePicture bio")
+    res.status(200).json(users)
+  } catch (error) {
+    console.error("Error fetching all profiles:", error)
+    res.status(500).json({ error: "Internal server error" })
+  }
+}
+
 const getProfile = async (req, res) => {
   try {
     const userId = req.user._id
@@ -7,7 +17,7 @@ const getProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" })
     }
-    res.json(user)
+    res.status(200).json(user)
   } catch (error) {
     console.error("Error fetching profile:", error)
     res.status(500).json({ error: "Internal server error" })
@@ -21,40 +31,69 @@ const getUserProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" })
     }
-    res.json(user)
+    res.status(200).json(user)
   } catch (error) {
     console.error("Error fetching user profile:", error)
     res.status(500).json({ error: "Internal server error" })
   }
 }
 
+const getMyFollowers = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const user = await User.findById(userId).populate("followers", "username profilePicture")
+    if (!user) {
+      return res.status(404).json({ error: "User not found" })
+    }
+    res.status(200).json(user.followers)
+  } catch (error) {
+    console.error("Error fetching followers:", error)
+    res.status(500).json({ error: "Internal server error" })
+  }
+}
+
+const getMyFollowing = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const user = await User.findById(userId).populate("following", "username profilePicture")
+    if (!user) {
+      return res.status(404).json({ error: "User not found" })
+    }
+    res.status(200).json(user.following)
+  } catch (error) {
+    console.error("Error fetching following:", error)
+    res.status(500).json({ error: "Internal server error" })
+  }
+}
+
+
 const followUser = async (req, res) => {
   try {
     const userId = req.user._id
-    const { targetUserId } = req.body
+    const { id } = req.params
 
-    if (userId.toString() === targetUserId) {
+    if (userId.toString() === id) {
       return res.status(400).json({ error: "You cannot follow yourself" })
     }
 
     const user = await User.findById(userId)
-    const targetUser = await User.findById(targetUserId)
+    const targetUser = await User.findById(id)
 
     if (!user || !targetUser) {
       return res.status(404).json({ error: "User not found" })
     }
 
-    if (user.following.includes(targetUserId)) {
+    if (user.following.includes(id)) {
       return res.status(400).json({ error: "You are already following this user" })
     }
 
-    user.following.push(targetUserId)
+    user.following.push(id)
     targetUser.followers.push(userId)
 
     await user.save()
     await targetUser.save()
 
-    res.json({ message: "Successfully followed the user" })
+    res.status(200).json({ message: "Successfully followed the user" })
   } catch (error) {
     console.error("Error following user:", error)
     res.status(500).json({ error: "Internal server error" })
@@ -64,30 +103,30 @@ const followUser = async (req, res) => {
 const unfollowUser = async (req, res) => {
   try {
     const userId = req.user._id
-    const { targetUserId } = req.body
+    const { id } = req.params
 
-    if (userId.toString() === targetUserId) {
+    if (userId.toString() === id) {
       return res.status(400).json({ error: "You cannot unfollow yourself" })
     }
 
     const user = await User.findById(userId)
-    const targetUser = await User.findById(targetUserId)
+    const targetUser = await User.findById(id)
 
     if (!user || !targetUser) {
       return res.status(404).json({ error: "User not found" })
     }
 
-    if (!user.following.includes(targetUserId)) {
+    if (!user.following.includes(id)) {
       return res.status(400).json({ error: "You are not following this user" })
     }
 
-    user.following.pull(targetUserId)
+    user.following.pull(id)
     targetUser.followers.pull(userId)
 
     await user.save()
     await targetUser.save()
 
-    res.json({ message: "Successfully unfollowed the user" })
+    res.status(200).json({ message: "Successfully unfollowed the user" })
   } catch (error) {
     console.error("Error unfollowing user:", error)
     res.status(500).json({ error: "Internal server error" })
@@ -115,28 +154,10 @@ const updateProfile = async (req, res) => {
     }
 
     await user.save()
-    res.json({ message: "Profile updated successfully", user })
+    res.status(200).json({ message: "Profile updated successfully", user })
   } catch (error) {
     console.error("Error updating profile:", error)
     res.status(500).json({ error: "Internal server error" })
-  }
-}
-
-
-async function getfriends(req, res) {
-  try {
-    const userId = req.user._id;
-    
-    const user = await User.findById(userId).populate("following", "username profilePicture bio");
-    
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    
-    res.json(user.following);
-  } catch (error) {
-    console.error("Error fetching friends:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
@@ -173,5 +194,7 @@ module.exports = {
     unfollowUser,
     updateProfile,
     getfriends,
-    searchFriends
+    searchFriends,
+    getMyFollowers,
+    getMyFollowing
 }
