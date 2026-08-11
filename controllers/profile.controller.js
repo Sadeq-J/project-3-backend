@@ -140,11 +140,38 @@ async function getfriends(req, res) {
   }
 }
 
+const searchFriends = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const { query } = req.query
+
+    if (!query) {
+      return res.status(400).json({ error: "Search query is required" })
+    }
+
+    const currentUser = await User.findById(userId)
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" })
+    }
+
+    const matchingFriends = await User.find({
+      _id: { $in: currentUser.following },
+      username: { $regex: query, $options: "i" } 
+    }).select("username profilePicture bio");
+
+    res.json(matchingFriends);
+  } catch (error) {
+    console.error("Error searching friends:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
     getProfile,
     getUserProfile,
     followUser,
     unfollowUser,
     updateProfile,
-    getfriends
+    getfriends,
+    searchFriends
 }
