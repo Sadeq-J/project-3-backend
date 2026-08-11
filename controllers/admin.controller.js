@@ -67,6 +67,27 @@ async function deleteBookingAdmin(req, res) {
     }
 }
 
+async function updateUserRole(req, res) {
+    try {
+        const { id } = req.params;
+        const { isAdmin } = req.body; // Expecting true or false
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id, 
+            { isAdmin }, 
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({ message: "User role updated successfully", user: updatedUser });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 
 module.exports = {
     getAllUsers,
@@ -74,5 +95,6 @@ module.exports = {
     getAllVenuesAdmin,
     deleteVenue,
     getAllBookingsAdmin,
-    deleteBookingAdmin
+    deleteBookingAdmin,
+    updateUserRole
 }
