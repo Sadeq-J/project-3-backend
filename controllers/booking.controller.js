@@ -111,10 +111,85 @@ async function updateBooking(req, res) {
     }
 }
 
+async function invitePlayer(req , res) {
+    try{
+        const {friendId} = req.body
+        const bookingId = req.params.id
+
+        const booking = await Booking.findById(bookingId)
+        if(!booking){
+            return res.status(404).json({ error: "Booking not found"})
+        }
+
+        if(booking.invitedPlayers.includes(friendId)){
+            return res.status(400).json({error: "Player already invited"})
+        }
+
+        booking.invitedPlayers.push(friendId)
+        await booking.save()
+
+        res.status(200).json({message: "Player invited successfully!", booking})
+    }
+    catch(error){
+        res.status(500).json({error: error.message})
+    }
+}
+
+
+async function getMyInnvitations(req , res){
+    try{
+        const invitations = await Booking.find({invitedPlayers: req.user._id}).populate('venue').populate('owner', 'username profileFicture')
+
+        res.status(200).json(invitations)
+    }
+    catch(error){
+        res.status(500).json({error: error.message})
+    }
+}
+
+
+async function joinBookingTeam(req , res) {
+    try{
+        const {teamChoice} = req.body
+        const bookingId = req.params.id
+        const userId = req.user._id
+
+        const booking = await Booking.findById(bookingId)
+        if(!booking) {
+            return res.status(404).json({error: "Booking Not Found"})
+        }
+
+        if(!booking.invitedPlayers.includes(userId)) {
+            return res.status(403).json({error: "You are not invited to this booking"})
+        }
+
+        if(teamChoice === "teamA"){
+            booking.teams.teamA.push(req.user.username)
+        }
+        else if(teamChoice === "teamB"){
+            booking.teams.teamB.push(req.user.username)
+        }
+        else {
+            return res.status(400).json({error: "Invalid team choice. Choose teamA or teamB"})
+        }
+
+        booking.invitedPlayers = booking.invitedPlayers.filter(id => id.toString() !== userId.toString())
+
+        await booking.save()
+        res.status(200).json({ message: "Successfully joined the match!", booking })
+    }
+    catch(error){
+        res.status(500).json({error: error.message})
+    }
+}
+
 
 
 export {
     createBooking,
     getBooking,
-    updateBooking
+    updateBooking,
+    invitePlayer,
+    getMyInnvitations,
+    joinBookingTeam
 }
