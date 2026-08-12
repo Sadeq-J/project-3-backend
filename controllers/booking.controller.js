@@ -191,6 +191,23 @@ async function joinBookingTeam(req, res) {
     }
 }
 
+async function getBookingsByVenue(req, res) {
+    try {
+        const bookings = await Booking.find({
+            venue: req.params.id
+        })
+            .populate('invitedPlayers', 'username')
+            .populate('teams.teamA', 'username')
+            .populate('teams.teamB', 'username')
+
+        res.status(200).json(bookings)
+
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
 
 
 export {
@@ -199,5 +216,6 @@ export {
     updateBooking,
     invitePlayer,
     getMyInnvitations,
-    joinBookingTeam
+    joinBookingTeam,
+    getBookingsByVenue
 }
