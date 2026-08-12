@@ -1,9 +1,18 @@
 const User = require("../models/User")
 const Notification = require("../models/Notifications")
+const { imagekit } = require("../middleware/upload")
 
 const getAllProfiles = async (req, res) => {
   try {
-    const users = await User.find().select("username profilePicture bio")
+    const { q } = req.query
+
+    const query = q
+      ? {
+          username: { $regex: q, $options: "i" }
+        }
+      : {}
+
+    const users = await User.find(query).select("username profilePicture bio isAdmin")
     res.status(200).json(users)
   } catch (error) {
     console.error("Error fetching all profiles:", error)
@@ -73,7 +82,7 @@ const followUser = async (req, res) => {
     const userId = req.user._id
     const { id } = req.params
 
-    if (userId.toString() === id) {
+    if (userId.toString() === id.toString()) {
       return res.status(400).json({ error: "You cannot follow yourself" })
     }
 
@@ -84,20 +93,21 @@ const followUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" })
     }
 
-    if (user.following.includes(id)) {
+    const alreadyFollowing = user.following.some((personId) => personId.toString() === id.toString())
+    if (alreadyFollowing) {
       return res.status(400).json({ error: "You are already following this user" })
     }
 
-    user.following.push(id)
-    targetUser.followers.push(userId)
+    user.following.push(targetUser._id)
+    targetUser.followers.push(user._id)
 
     await user.save()
     await targetUser.save()
 
     await Notification.create({
-      recipient: targetUserId,
-      sender: userId,
-      type: 'follow'
+      recipient: targetUser._id,
+      sender: user._id,
+      type: "follow"
     })
 
     res.status(200).json({ message: "Successfully followed the user" })
@@ -112,7 +122,7 @@ const unfollowUser = async (req, res) => {
     const userId = req.user._id
     const { id } = req.params
 
-    if (userId.toString() === id) {
+    if (userId.toString() === id.toString()) {
       return res.status(400).json({ error: "You cannot unfollow yourself" })
     }
 
@@ -123,12 +133,13 @@ const unfollowUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" })
     }
 
-    if (!user.following.includes(id)) {
+    const isFollowing = user.following.some((personId) => personId.toString() === id.toString())
+    if (!isFollowing) {
       return res.status(400).json({ error: "You are not following this user" })
     }
 
-    user.following.pull(id)
-    targetUser.followers.pull(userId)
+    user.following = user.following.filter((personId) => personId.toString() !== id.toString())
+    targetUser.followers = targetUser.followers.filter((personId) => personId.toString() !== userId.toString())
 
     await user.save()
     await targetUser.save()
@@ -151,11 +162,20 @@ const updateProfile = async (req, res) => {
     }
 
     if (username) user.username = username
-    if (bio) user.bio = bio
+    if (bio !== undefined) user.bio = bio || ""
 
-    // If an image file was uploaded via Multer/Cloudinary, save its secure URL
     if (req.file) {
-      user.profilePicture = req.file.path
+      try {
+        const uploadResponse = await imagekit.upload({
+          file: req.file.buffer,
+          fileName: `profile_${userId}_${Date.now()}_${req.file.originalname}`,
+          folder: "/profile-pictures",
+        })
+
+        user.profilePicture = uploadResponse.url
+      } catch (uploadError) {
+        console.warn("Profile image upload failed:", uploadError.message)
+      }
     } else if (req.body.profilePicture) {
       user.profilePicture = req.body.profilePicture
     }
@@ -211,7 +231,34 @@ const searchFriends = async (req, res) => {
   }
 };
 
+const searchFollowers = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const { query } = req.query
+
+    if (!query) {
+      return res.status(400).json({ error: "Search query is required" })
+    }
+
+    const currentUser = await User.findById(userId)
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" })
+    }
+
+    const matchingFollowers = await User.find({
+      _id: { $in: currentUser.followers },
+      username: { $regex: query, $options: "i" }
+    }).select("username profilePicture bio");
+
+    res.json(matchingFollowers);
+  } catch (error) {
+    console.error("Error searching followers:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  getAllProfiles,
   getProfile,
   getUserProfile,
   followUser,
@@ -219,6 +266,7 @@ module.exports = {
   updateProfile,
   getfriends,
   searchFriends,
+  searchFollowers,
   getMyFollowers,
   getMyFollowing
 }

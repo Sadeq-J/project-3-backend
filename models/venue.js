@@ -26,8 +26,6 @@ const venueSchema = new mongoose.Schema(
     pricePerHour: {
       type: Number,
       required: true,
-      min: 10,
-      max: 30,
     },
 
     images: [

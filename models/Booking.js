@@ -25,6 +25,18 @@ const bookingSchema = new mongoose.Schema({
         enum: ['Confirmed', 'Cancelled'],
         default: 'Confirmed'
     },
+    teamName: {
+        type: String,
+        trim: true
+    },
+    opponentTeamName: {
+        type: String,
+        trim: true
+    },
+    matchRequestNote: {
+        type: String,
+        trim: true
+    },
     invitedPlayers:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

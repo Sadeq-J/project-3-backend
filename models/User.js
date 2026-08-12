@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
     profilePicture: {
       type: String,
       default: "https://res.cloudinary.com/dxjv7gq3f/image/upload/v1697040910/default-profile-picture-1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_q6kz8b.png"
+    },
+    bio: {
+      type: String,
+      default: "",
+      maxlength: 250,
     }
   },
   { timestamps: true },

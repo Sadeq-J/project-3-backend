@@ -34,11 +34,28 @@ const normalizeVenuePayload = (req) => {
 
 const getVenues = async (req, res) => {
   try {
-    const { sportType, location, minPrice, maxPrice } = req.query;
+    const { sportType, location, minPrice, maxPrice, search } = req.query;
     const filter = {};
 
-    if (sportType) filter.sportType = sportType;
-    if (location) filter.location = location;
+    if (sportType) {
+      const normalizedSport = String(sportType).trim();
+      filter.sportType = { $regex: new RegExp(`^${normalizedSport}$`, "i") };
+    }
+
+    if (location) {
+      const normalizedLocation = String(location).trim();
+      filter.location = { $regex: new RegExp(`^${normalizedLocation}$`, "i") };
+    }
+
+    if (search && String(search).trim()) {
+      const term = String(search).trim();
+      filter.$or = [
+        { name: { $regex: term, $options: "i" } },
+        { location: { $regex: term, $options: "i" } },
+        { description: { $regex: term, $options: "i" } },
+        { sportType: { $regex: term, $options: "i" } },
+      ];
+    }
 
     if (minPrice || maxPrice) {
       filter.pricePerHour = {};

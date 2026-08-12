@@ -5,7 +5,7 @@ import Notification from "../models/Notifications.js"
 
 async function createBooking(req, res) {
     try {
-        const { date, timeSlots, status, invitedPlayers, teams } = req.body
+        const { date, timeSlots, status, invitedPlayers, teams, teamName, opponentTeamName, matchRequestNote } = req.body
 
         const venue = await Venue.findById(req.params.id)
         if (!venue) {
@@ -34,6 +34,9 @@ async function createBooking(req, res) {
                 date,
                 timeSlots,
                 status,
+                teamName,
+                opponentTeamName,
+                matchRequestNote,
                 invitedPlayers: invitedPlayers || [],
                 teams: teams || { teamA: [], teamB: [] }
             })
@@ -45,6 +48,9 @@ async function createBooking(req, res) {
                 date,
                 timeSlots,
                 status,
+                teamName,
+                opponentTeamName,
+                matchRequestNote,
             })
         }
         res.status(201).json(createdBook);
