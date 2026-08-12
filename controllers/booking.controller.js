@@ -1,5 +1,5 @@
 import Booking from '../models/Booking.js'
-import Venue from '../models/Venue.js'
+import Venue from '../models/venue.js'
 import Notification from "../models/Notifications.js"
 
 
