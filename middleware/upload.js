@@ -1,10 +1,12 @@
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
+const ImageKit = require('imagekit');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+// Initialize ImageKit
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
 const storage = multer.memoryStorage();
@@ -15,9 +17,9 @@ const upload = multer({
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
-      return;
+    } else {
+      cb(new Error('Unsupported image format'));
     }
-    cb(new Error('Unsupported image format'));
   },
 });
 
