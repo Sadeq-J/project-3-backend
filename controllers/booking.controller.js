@@ -1,15 +1,8 @@
+
 import Booking from '../models/Booking.js'
 import Venue from '../models/Venue.js'
 import Notification from "../models/Notifications.js"
 
-async function getAllBookings(req, res) {
-    try {
-        const bookings = await Booking.find().populate('venue date timeSlots')
-        res.status(200).json(bookings)
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-}
 
 async function createBooking(req, res) {
     try {
@@ -67,15 +60,8 @@ async function createBooking(req, res) {
 async function getBooking(req, res) {
     try {
         const foundBook = await Booking.find({ owner: req.user._id })
-            .populate('venue')
-            .populate('invitedPlayers', 'username')
-            .populate('teams.teamA', 'username')
-            .populate('teams.teamB', 'username');
-
         res.status(200).json(foundBook);
     } catch (error) {
-        console.log("GET MY BOOKINGS ERROR:", error);
-
         res.status(500).json({
             error: error.message,
         });
@@ -93,7 +79,7 @@ async function updateBooking(req, res) {
             })
         }
 
-        if (book.owner.toString() !== req.user._id.toString()) {
+        if (book.owner.toString() !== req.user._id.toString() && !req.user.isAdmin) {
             return res.status(403).json({
                 error: 'Not authorized'
             })
@@ -106,14 +92,7 @@ async function updateBooking(req, res) {
             })
         }
 
-        const isFootball = Array.isArray(venue.sportType)
-            ? venue.sportType.some(
-                sport => typeof sport === 'string' && sport.toLowerCase() === 'football'
-            )
-            : typeof venue.sportType === 'string' &&
-              venue.sportType.toLowerCase() === 'football'
-
-        if (!isFootball) {
+        if (venue.sportType !== "football") {
             return res.status(400).json({
                 error: 'Only football bookings can be updated'
             })
@@ -193,10 +172,10 @@ async function joinBookingTeam(req, res) {
         }
 
         if (teamChoice === "teamA") {
-            booking.teams.teamA.push(req.user._id)
+            booking.teams.teamA.push(req.user.username)
         }
         else if (teamChoice === "teamB") {
-            booking.teams.teamB.push(req.user._id)
+            booking.teams.teamB.push(req.user.username)
         }
         else {
             return res.status(400).json({ error: "Invalid team choice. Choose teamA or teamB" })
@@ -212,23 +191,6 @@ async function joinBookingTeam(req, res) {
     }
 }
 
-async function getBookingsByVenue(req, res) {
-    try {
-        const bookings = await Booking.find({
-            venue: req.params.id
-        })
-            .populate('invitedPlayers', 'username')
-            .populate('teams.teamA', 'username')
-            .populate('teams.teamB', 'username')
-
-        res.status(200).json(bookings)
-
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
-        })
-    }
-}
 
 
 export {
@@ -237,7 +199,5 @@ export {
     updateBooking,
     invitePlayer,
     getMyInnvitations,
-    joinBookingTeam,
-    getBookingsByVenue,
-    getAllBookings
+    joinBookingTeam
 }
