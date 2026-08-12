@@ -1,3 +1,4 @@
+const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const ImageKit = require('imagekit');
 
@@ -8,8 +9,8 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-// Use memory storage so Multer grabs the file buffer
 const storage = multer.memoryStorage();
+
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -22,4 +23,4 @@ const upload = multer({
   },
 });
 
-module.exports = { upload, imagekit };
+module.exports = { upload, cloudinary };

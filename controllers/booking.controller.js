@@ -1,4 +1,3 @@
-
 import Booking from '../models/Booking.js'
 import Venue from '../models/Venue.js'
 import Notification from "../models/Notifications.js"
@@ -57,9 +56,25 @@ async function createBooking(req, res) {
     }
 }
 
+async function getBookingsByVenue(req, res) {
+    try {
+        const bookings = await Booking.find({ venue: req.params.id })
+        res.status(200).json(bookings)
+    } catch (error) {
+        console.error('GET BOOKINGS BY VENUE ERROR:', error)
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
 async function getBooking(req, res) {
     try {
         const foundBook = await Booking.find({ owner: req.user._id })
+            .populate('venue')
+            .populate('invitedPlayers', 'username profilePicture')
+            .populate('teams.teamA', 'username profilePicture')
+            .populate('teams.teamB', 'username profilePicture')
         res.status(200).json(foundBook);
     } catch (error) {
         res.status(500).json({
@@ -92,7 +107,13 @@ async function updateBooking(req, res) {
             })
         }
 
-        if (venue.sportType !== "football") {
+        const isFootball = Array.isArray(venue.sportType)
+            ? venue.sportType.some(
+                sport => typeof sport === 'string' && sport.toLowerCase() === 'football'
+            )
+            : typeof venue.sportType === 'string' && venue.sportType.toLowerCase() === 'football'
+
+        if (!isFootball) {
             return res.status(400).json({
                 error: 'Only football bookings can be updated'
             })
@@ -172,10 +193,10 @@ async function joinBookingTeam(req, res) {
         }
 
         if (teamChoice === "teamA") {
-            booking.teams.teamA.push(req.user.username)
+            booking.teams.teamA.push(userId)
         }
         else if (teamChoice === "teamB") {
-            booking.teams.teamB.push(req.user.username)
+            booking.teams.teamB.push(userId)
         }
         else {
             return res.status(400).json({ error: "Invalid team choice. Choose teamA or teamB" })
@@ -199,5 +220,6 @@ export {
     updateBooking,
     invitePlayer,
     getMyInnvitations,
-    joinBookingTeam
+    joinBookingTeam,
+    getBookingsByVenue
 }

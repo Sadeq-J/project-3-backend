@@ -124,5 +124,4 @@ module.exports = {
     updateUserRole,
     createVenue,
     updateVenue
-    updateUserRole
 }

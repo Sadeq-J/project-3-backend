@@ -31,10 +31,12 @@ const bookingSchema = new mongoose.Schema({
     }],
     teams:{
         teamA:[{
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         }],
         teamB:[{
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         }],
     }
 }, {timestamps: true})
