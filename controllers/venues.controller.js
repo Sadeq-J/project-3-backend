@@ -1,6 +1,5 @@
 const Venue = require("../models/Venue");
-const { cloudinary } = require("../middleware/upload"); // 👈 Import cloudinary from your upload middleware
-const { Readable } = require("stream")
+const { imagekit } = require("../middleware/upload"); // 👈 import imagekit
 
 const normalizeVenuePayload = (req) => {
   const payload = { ...req.body };
@@ -72,19 +71,6 @@ async function getVenuesById(req, res) {
   }
 }
 
-const uploadBufferToCloudinary = (fileBuffer) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "venue-images" },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    Readable.from(fileBuffer).pipe(uploadStream);
-  });
-};
-
 async function createVenue(req, res) {
   try {
     let imageUrls = [];
@@ -92,24 +78,22 @@ async function createVenue(req, res) {
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
-          const b64 = Buffer.from(file.buffer).toString("base64");
-          let dataURI = `data:${file.mimetype};base64,${b64}`;
-          
-          const uploadResponse = await cloudinary.uploader.upload(dataURI, {
-            folder: "venue-images",
+          // 🔥 Upload buffer directly to ImageKit
+          const uploadResponse = await imagekit.upload({
+            file: file.buffer, // buffer from multer memory storage
+            fileName: `venue_${Date.now()}_${file.originalname}`,
+            folder: "/venue-images",
           });
-          
-          // 🔥 Wrap successful upload in an object matching your subdocument schema
-          imageUrls.push({ url: uploadResponse.secure_url });
+
+          imageUrls.push(uploadResponse.url);
         } catch (uploadErr) {
-          console.warn("⚠️ Cloudinary upload failed:", uploadErr.message);
+          console.warn("⚠️ ImageKit upload failed:", uploadErr.message);
         }
       }
     }
 
-    // 🔥 If Cloudinary failed or no files were uploaded, use a valid object fallback
     if (imageUrls.length === 0) {
-      imageUrls.push({ url: "https://via.placeholder.com/800x500?text=Venue+Image" });
+      imageUrls.push("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%2364748b'%3EVenue Image%3C/text%3E%3C/svg%3E");
     }
 
     const payload = normalizeVenuePayload(req);
@@ -145,15 +129,14 @@ const updateVenue = async (req, res) => {
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
-          const b64 = Buffer.from(file.buffer).toString("base64");
-          let dataURI = `data:${file.mimetype};base64,${b64}`;
-          
-          const uploadResponse = await cloudinary.uploader.upload(dataURI, {
-            folder: "venue-images",
+          const uploadResponse = await imagekit.upload({
+            file: file.buffer,
+            fileName: `venue_${Date.now()}_${file.originalname}`,
+            folder: "/venue-images",
           });
-          imageUrls.push({ url: uploadResponse.secure_url });
+          imageUrls.push(uploadResponse.url);
         } catch (uploadErr) {
-          console.warn("⚠️ Cloudinary update upload failed:", uploadErr.message);
+          console.warn("⚠️ ImageKit update upload failed:", uploadErr.message);
         }
       }
     }
