@@ -120,5 +120,8 @@ module.exports = {
     getAllVenuesAdmin,
     deleteVenue,
     getAllBookingsAdmin,
-    deleteBookingAdmin
+    deleteBookingAdmin,
+    updateUserRole,
+    createVenue,
+    updateVenue
 }
