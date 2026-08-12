@@ -106,7 +106,14 @@ async function updateBooking(req, res) {
             })
         }
 
-        if (venue.sportType !== "football") {
+        const isFootball = Array.isArray(venue.sportType)
+            ? venue.sportType.some(
+                sport => typeof sport === 'string' && sport.toLowerCase() === 'football'
+            )
+            : typeof venue.sportType === 'string' &&
+              venue.sportType.toLowerCase() === 'football'
+
+        if (!isFootball) {
             return res.status(400).json({
                 error: 'Only football bookings can be updated'
             })
