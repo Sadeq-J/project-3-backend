@@ -3,6 +3,14 @@ import Booking from '../models/Booking.js'
 import Venue from '../models/Venue.js'
 import Notification from "../models/Notifications.js"
 
+async function getAllBookings(req, res) {
+    try {
+        const bookings = await Booking.find().populate('venue date timeSlots')
+        res.status(200).json(bookings)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
 
 async function createBooking(req, res) {
     try {
@@ -217,5 +225,6 @@ export {
     invitePlayer,
     getMyInnvitations,
     joinBookingTeam,
-    getBookingsByVenue
+    getBookingsByVenue,
+    getAllBookings
 }
