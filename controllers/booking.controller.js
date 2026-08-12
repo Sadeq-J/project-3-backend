@@ -1,4 +1,3 @@
-
 import Booking from '../models/Booking.js'
 import Venue from '../models/Venue.js'
 import Notification from "../models/Notifications.js"
@@ -68,8 +67,15 @@ async function createBooking(req, res) {
 async function getBooking(req, res) {
     try {
         const foundBook = await Booking.find({ owner: req.user._id })
+            .populate('venue')
+            .populate('invitedPlayers', 'username')
+            .populate('teams.teamA', 'username')
+            .populate('teams.teamB', 'username');
+
         res.status(200).json(foundBook);
     } catch (error) {
+        console.log("GET MY BOOKINGS ERROR:", error);
+
         res.status(500).json({
             error: error.message,
         });
@@ -180,10 +186,10 @@ async function joinBookingTeam(req, res) {
         }
 
         if (teamChoice === "teamA") {
-            booking.teams.teamA.push(req.user.username)
+            booking.teams.teamA.push(req.user._id)
         }
         else if (teamChoice === "teamB") {
-            booking.teams.teamB.push(req.user.username)
+            booking.teams.teamB.push(req.user._id)
         }
         else {
             return res.status(400).json({ error: "Invalid team choice. Choose teamA or teamB" })
