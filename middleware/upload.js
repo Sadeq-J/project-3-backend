@@ -1,38 +1,25 @@
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const ImageKit = require('imagekit');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+// Initialize ImageKit
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-// console.log("☁️ CLOUDINARY CONFIG CHECK:", {
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   // Print the first 4 characters of the secret to see if there's a stray quote or space
-//   secret_preview: process.env.CLOUDINARY_API_SECRET ? process.env.CLOUDINARY_API_SECRET.substring(0, 4) + "..." : "MISSING"
-// })
-
-// const storage = new CloudinaryStorage({
-//   cloudinary,
-//   params: {
-//     folder: 'venue-images',
-//     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-//   },
-// });
-const storage = multer.memoryStorage()
+// Use memory storage so Multer grabs the file buffer
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
-      return;
+    } else {
+      cb(new Error('Unsupported image format'));
     }
-    cb(new Error('Unsupported image format'));
   },
 });
 
-module.exports = { upload, cloudinary };
+module.exports = { upload, imagekit };
