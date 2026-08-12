@@ -89,6 +89,31 @@ async function updateUserRole(req, res) {
 }
 
 
+async function createVenue(req, res) {
+    try {
+        const newVenue = await Venue.create(req.body);
+        res.status(201).json(newVenue);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "error.message", error });
+    }
+}
+
+async function updateVenue(req, res) {
+    try {
+        const updatedVenue = await Venue.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { new: true }
+        );
+        res.status(200).json(updatedVenue);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+
 module.exports = {
     getAllUsers,
     deleteUser,
@@ -96,5 +121,8 @@ module.exports = {
     deleteVenue,
     getAllBookingsAdmin,
     deleteBookingAdmin,
+    updateUserRole,
+    createVenue,
+    updateVenue
     updateUserRole
 }
