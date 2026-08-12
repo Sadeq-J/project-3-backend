@@ -79,7 +79,7 @@ async function updateBooking(req, res) {
             })
         }
 
-        if (book.owner.toString() !== req.user._id.toString()) {
+        if (book.owner.toString() !== req.user._id.toString() && !req.user.isAdmin) {
             return res.status(403).json({
                 error: 'Not authorized'
             })

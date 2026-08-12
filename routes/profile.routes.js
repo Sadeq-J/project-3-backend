@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { getProfile, getUserProfile, followUser, unfollowUser, updateProfile, getfriends, searchFriends, getMyFollowers, getMyFollowing} = require('../controllers/profile.controller');
 const verifyToken = require('../middleware/verifyToken');
-const upload = require('../middleware/upload'); // Cloudinary/Multer middleware
+const {upload} = require('../middleware/upload'); // Cloudinary/Multer middleware
 
 router.get('/followers', verifyToken, getMyFollowers)
 router.get('/following', verifyToken, getMyFollowing)

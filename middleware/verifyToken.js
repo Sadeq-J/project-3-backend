@@ -2,20 +2,28 @@
 
 // We'll need to import jwt to use the verify method
 const jwt = require('jsonwebtoken');
+const User = require('../models/User')
 
-function verifyToken(req, res, next) {
+async function verifyToken(req, res, next) {
   try {
-    const token = req.headers.authorization.split(' ')[1];
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    if (!authHeader) {
+      return res.status(401).json({ err: 'No token provided.' });
+    }
+
+    const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Assign decoded payload to req.user. Some tokens wrap the payload
-    // in a `payload` property while others put claims at the root.
-    req.user =  decoded;
+    const user = await User.findById(decoded._id || decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({ err: 'User not found.' });
+    }
 
-    // Call next() to invoke the next middleware function
+    req.user = user;
+
     next();
   } catch (err) {
-    // If any errors, send back a 401 status and an 'Invalid token.' error message
     res.status(401).json({ err: 'Invalid token.' });
   }
 }

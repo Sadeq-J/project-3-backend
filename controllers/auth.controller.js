@@ -74,6 +74,7 @@ async function signIn(req, res) {
       user: {
         _id: user._id,
         username: user.username,
+        isAdmin: user.isAdmin
       },
     });
   } catch (err) {
