@@ -6,12 +6,12 @@ const User = require('../models/User')
 
 async function verifyToken(req, res, next) {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
     if (!authHeader) {
       return res.status(401).json({ err: 'No token provided.' });
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded._id || decoded.id);
