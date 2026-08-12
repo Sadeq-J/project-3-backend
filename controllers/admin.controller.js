@@ -1,5 +1,5 @@
 const User = require('../models/User')
-const Venue = require('../models/Venue')
+const Venue = require('../models/venue.js')
 const Booking = require('../models/Booking')
 
 
