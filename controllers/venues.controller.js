@@ -1,4 +1,4 @@
-const Venue = require("../models/Venue.js");
+const Venue = require("../models/venue.js");
 const { imagekit } = require("../middleware/upload.js"); // 👈 import imagekit
 
 const normalizeVenuePayload = (req) => {
