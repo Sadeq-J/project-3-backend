@@ -192,7 +192,7 @@ Install the following before running the project:
 
 ## API Base URL
 - **Local development:** `http://localhost:3000`
-- **Production:** `https://maidan3.netlify.app/`
+- **Production:** [Deployed App](https://maidan3.netlify.app/)
 
 ## Endpoints
 
