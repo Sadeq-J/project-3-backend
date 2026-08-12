@@ -23,4 +23,4 @@ const upload = multer({
   },
 });
 
-module.exports = { upload, cloudinary };
+module.exports = { upload, imagekit };
