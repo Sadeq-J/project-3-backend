@@ -95,7 +95,7 @@ const followUser = async (req, res) => {
     await targetUser.save()
 
     await Notification.create({
-      recipient: id,
+      recipient: targetUserId,
       sender: userId,
       type: 'follow'
     })
