@@ -1,5 +1,5 @@
-const Venue = require("../models/Venue");
-const { imagekit } = require("../middleware/upload"); // 👈 import imagekit
+const Venue = require("../models/Venue.js");
+const { imagekit } = require("../middleware/upload.js"); // 👈 import imagekit
 
 const normalizeVenuePayload = (req) => {
   const payload = { ...req.body };
